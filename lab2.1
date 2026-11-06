@@ -1,0 +1,12 @@
+import math
+x = float(input("Введите значение x: "))
+if -6 <= x <= -3:
+    y = x + 3
+elif -3 < x <= 1:
+    y = 3 ** x
+elif 1 < x <= 5:
+    y = 3 - math.sqrt(4 - (x - 3) ** 2)
+elif 5 < x <= 8:
+    y = -1.5 * x + 10.5
+print(f"Значение функции: y = {y:.2f}")
+print("X={0:.2f} Y={1:.2f}".format(x, y))
