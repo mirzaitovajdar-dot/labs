@@ -1,0 +1,56 @@
+def matrix_sum(A, B):
+    #сумма матриц одинакового размера
+    n = len(A)
+    return [[A[i][k] + B[i][k] for k in range(n)] for i in range(n)]
+
+def matrix_mult(A, B):
+    #произведение матриц c_ik = сумма a_ij * b_jk
+    n = len(A)
+    C = [[0.0] * n for _ in range(n)]
+    for i in range(n):
+        for k in range(n):
+            s = 0.0
+            for j in range(n):
+                s += A[i][j] * B[j][k]
+            C[i][k] = s
+    return C
+
+def matrix_scale(lam, A):
+    #умножение матрицы на число
+    n = len(A)
+    return [[lam * A[i][k] for k in range(n)] for i in range(n)]
+
+def identity(n):
+    #единичная матрица
+    return [[1.0 if i == k else 0.0 for k in range(n)] for i in range(n)]
+
+def print_matrix(A, title):
+    print(title)
+    for row in A:
+        print("  ".join(f"{x:10.4f}" for x in row))
+    print()
+
+#ввод данных
+n_dim = int(input("Введите размерность матрицы: "))
+n_terms = int(input("Введите количество членов ряда n: "))
+
+print(f"Введите матрицу A ({n_dim}x{n_dim}) построчно, числа через пробел:")
+A = []
+for i in range(n_dim):
+    row = list(map(float, input().split()))
+    A.append(row)
+
+#вычисление экспоненты
+# e^A = I + A/1! + A^2/2! + A^3/3! + ...
+#начальный член ряда — единичная матрица
+E = identity(n_dim)          
+#текущий член ряда A^k / k!
+term = identity(n_dim)       
+
+for k in range(1, n_terms):
+    term = matrix_mult(term, A)          # A^k
+    term = matrix_scale(1.0 / k, term)   # делим на k! (умножаем на 1/k)
+    E = matrix_sum(E, term)
+
+print_matrix(A, "Матрица A:")
+print_matrix(E, f"Экспонента e^A (сумма первых {n_terms} членов ряда):")
