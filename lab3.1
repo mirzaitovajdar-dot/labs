@@ -1,0 +1,24 @@
+import math
+
+def y(x):
+
+    if -6 <= x <= -3:
+        return x + 3
+    elif -3 < x <= 1:
+        return 3 ** x
+    elif 1 < x <= 5:
+        return 3 - math.sqrt(4 - (x - 3) ** 2)
+    elif 5 < x <= 8:
+        return -1.5 * x + 10.5
+
+Xнач, Xкон, dx = -6.0, 8.0, 0.5
+
+print("|Таблица значений функции|")
+print("|{:>5s} |{:>5s} |".format("x", "y"))
+print("-" * 15)
+
+x = Xнач
+n = round((Xкон - Xнач) / dx)
+for i in range(n + 1):
+    x = Xнач + i * dx
+    print("|{:1.2f} |{:2.2f} |".format(x, y(x)))
