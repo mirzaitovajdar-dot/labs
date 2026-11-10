@@ -1,0 +1,41 @@
+def taylor(x, eps, max_iter=1000):
+    
+    term = 5.0 * x            # первый член: 2*3*4*5/24 * x = 5x
+    total = term
+    k = 1
+    n = 1                     # сколько членов просуммировали
+    while abs(term) >= eps:
+        if n >= max_iter:
+            return None
+        term *= -x * (k + 5) / (k + 1)   # переход к следующему члену
+        total += term
+        k += 1
+        n += 1
+    return total, n
+
+
+def main():
+    x_start = float(input('Xнач = '))
+    x_end = float(input('Xкон = '))
+    dx = float(input('шаг dx = '))
+    eps = float(input('точность eps = '))
+
+    steps = round((x_end - x_start) / dx)   # чтобы не накапливать ошибку сложения
+
+    print('   Вычисление функции с помощью ряда Тейлора')
+    print('------------------------------------------------------')
+    print(f'|{"x":^9}|{"значение ряда":^21}|{"число членов":^13}|')
+    print('------------------------------------------------------')
+
+    for i in range(steps + 1):
+        x = x_start + i * dx
+        res = taylor(x, eps)
+        if res is None:
+            print(f'|{x:^10.4f}|{"ряд расходится":^22}|{"—":^14}|')
+        else:
+            s, n = res
+            print(f'|{x:^10.4f}|{s:^22.10f}|{n:^14d}|')
+    print('------------------------------------------------------')
+
+
+main()
