@@ -1,0 +1,28 @@
+import math
+
+try: #Открываем файл input.txt для чтения и output.txt для записи
+    with open('input.txt', 'r', encoding='utf-8') as f_in, open('output.txt', 'w', encoding='utf-8') as f_out:
+        #Читаем первую строку и преобразуем в число
+        line = f_in.readline().strip()
+        if not line:
+            raise ValueError("Файл input.txt пуст")
+        a = float(line)
+
+        denominator = 2 * (1 / math.tan(math.pi/4 + a)) * (math.cos(math.pi/4 - a) ** 2)
+        
+        z1 = (1 - 2 * math.sin(a) ** 2) / denominator + math.exp(a)
+        
+        z2 = 1 + math.exp(a)
+
+        #Формируем строки вывода
+        output_z1 = f"z1 = {z1:.4f}"
+        output_z2 = f"z2 = {z2:.4f}"
+
+        #Записываем результаты в файл output.txt
+        f_out.write(output_z1 + '\n')
+        f_out.write(output_z2 + '\n')
+        
+        print("Расчет выполнен успешно. Результаты сохранены в output.txt")
+
+except FileNotFoundError:
+    print("Ошибка: Файл input.txt не найден. Создайте его и запишите в него число.")
