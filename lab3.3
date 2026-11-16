@@ -31,7 +31,7 @@ def main():
         x = x_start + i * dx
         res = taylor(x, eps)
         if res is None:
-            print(f'|{x:^10.4f}|{"ряд расходится":^22}|{"—":^14}|')
+            print(f'|{x:^10.4f}|{"ряд расходится":^22}|{i:^14}|')
         else:
             s, n = res
             print(f'|{x:^10.4f}|{s:^22.10f}|{n:^14d}|')
