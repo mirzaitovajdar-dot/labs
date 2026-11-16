@@ -1,14 +1,29 @@
 import random
 import math
 
-for i in range(1, 11):
-    x = random.uniform(-2, 2)
-    y = random.uniform(-2, 2)
-    r = 2 * math.cos(2 * x)
+def is_hit(x, y, R):
+    #вне круга, но в закрашенной области
+    in_square = -R <= x <= R and -R <= y <= R
+    outside_circle = x**2 + y**2 > R**2
+    
+    #внутри круга, но в заштрихованных сегментах
+    inside_circle = x**2 + y**2 <= R**2
+    segment_1 = y > x + R  # выше хорды от (-R, 0) до (0, R)
+    segment_2 = y < -x - R  # ниже хорды от (R, 0) до (0, -R)
+    
+    return (in_square and outside_circle) or (inside_circle and (segment_1 or segment_2))
 
-    if -2 <= x <= 2 and y * (y - r) <= 0:
-        result = "попадание"
+#Параметры
+R = 1.0  # радиус круга
+num_shots = 10
+
+# Генерация выстрелов и проверка попаданий
+for i in range(num_shots):
+    #Генерируем случайные координаты
+    x = random.uniform(-R, R)
+    y = random.uniform(-R, R)
+    
+    if is_hit(x, y, R):
+        print(f"Выстрел {i+1}: ({x:.3f}, {y:.3f}) — ПОПАДАНИЕ")
     else:
-        result = "промах"
-
-    print(f"Выстрел {i:}: x = {x:1.2f}  y = {y:2.2f}  — {result}")
+        print(f"Выстрел {i+1}: ({x:.3f}, {y:.3f}) — ПРОМАХ")
