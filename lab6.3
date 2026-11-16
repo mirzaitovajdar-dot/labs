@@ -1,77 +1,26 @@
-def matrix_sum(A, B):
-    #сумма матриц одинакового размера
-    n = len(A)
-    return [[A[i][k] + B[i][k] for k in range(n)] for i in range(n)]
+import random
 
+rows = 4
+cols = 13
+total_elements = rows * cols  # 52 элемента
 
-def matrix_mult(A, B):
-    #произведение матриц c_ik = сумма a_ij * b_jk
-    n = len(A)
-    C = [[0.0] * n for _ in range(n)]
-    for i in range(n):
-        for k in range(n):
-            s = 0.0
-            for j in range(n):
-                s += A[i][j] * B[j][k]
-            C[i][k] = s
-    return C
+#Генерируем список чисел от 1 до 52 и перемешиваем их
+numbers = list(range(1, total_elements + 1))
+random.shuffle(numbers)
 
+# аполняем матрицу берём числа из перемешанного списка
+matrix = []
+index = 0
+for _ in range(rows):
+    row = numbers[index:index + cols]
+    matrix.append(row)
+    index += cols
 
-def matrix_scale(lam, A):
-    #умножение матрицы на число
-    n = len(A)
-    return [[lam * A[i][k] for k in range(n)] for i in range(n)]
+# --- Вывод результатов в файл output.txt ---
+with open('output5.txt', 'w', encoding='utf-8') as f:
+    for row in matrix:
+        #Каждое число занимает 3 символа для ровного столбца
+        line = " ".join(f"{num:3}" for num in row)
+        f.write(line + '\n')
 
-
-def identity(n):
-    #единичная матрица
-    return [[1.0 if i == k else 0.0 for k in range(n)] for i in range(n)]
-
-
-def read_matrix_from_file(filename):
-    with open(filename, 'r') as f:
-        lines = [line.strip() for line in f if line.strip()]
-
-    n_dim = int(lines)
-    n_terms = int(lines)
-
-    for i in range(n_dim):
-        row_values = list(map(float, lines[2 + i].split()))
-        if len(row_values) != n_dim:
-            raise ValueError(f"Строка {i + 2} содержит неверное количество элементов.")
-        A.append(row_values)
-
-    return n_dim, n_terms, A
-
-
-def write_matrix_to_file(filename, A, title):
-    with open(filename, 'a') as f:
-        f.write(title + "\n")
-        for row in A:
-            formatted_row = " ".join(f"{x:10.4f}" for x in row)
-            f.write(formatted_row + "\n")
-        f.write("\n")
-
-
-if __name__ == "__main__":
-    input_file = "input5.txt"
-    output_file = "output5.txt"
-
-    #очищаем выходной файл перед новой записью
-    with open(output_file, 'w') as f:
-        pass
-
-    n_dim, n_terms, A = read_matrix_from_file(input_file)
-
-    #вычисление экспоненты: e^A = I + A/1! + A^2/2! + A^3/3! + ...
-    E = identity(n_dim)          #начальный член ряда — единичная матрица
-    term = identity(n_dim)       #текущий член ряда A^k / k!
-
-    for k in range(1, n_terms):
-        term = matrix_mult(term, A)          #A^k
-        term = matrix_scale(1.0 / k, term)   #делим на k! (умножаем на 1/k)
-        E = matrix_sum(E, term)
-
-    #вывод результатов в файл
-    write_matrix_to_file(output_file, A, "Матрица A:")
-    write_matrix_to_file(output_file, E, f"Экспонента e^A (сумма первых {n_terms} членов ряда):")
+print("Матрица успешно записана в output5.txt")
