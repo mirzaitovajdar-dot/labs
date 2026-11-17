@@ -1,0 +1,57 @@
+import math
+import matplotlib.pyplot as plt
+
+def y(x):
+    if -6 <= x <= -3:
+        return x + 3
+    elif -3 < x <= 1:
+        return 3 ** x
+    elif 1 < x <= 5:
+        # Здесь важно: подкоренное выражение должно быть >= 0.
+        # При x в (1,5] выражение 4-(x-3)^2 >= 0, всё корректно.
+        return 3 - math.sqrt(4 - (x - 3) ** 2)
+    elif 5 < x <= 8:
+        return -1.5 * x + 10.5
+    else:
+        return None  # вне области определения
+
+# Параметры сетки
+Xst, Xen, dx = -6.0, 8.0, 0.01  # для графика берём мелкий шаг, чтобы кривая была гладкой
+
+# 1. Таблица (с шагом 0.5, как в твоём задании)
+print("|Таблица значений функции|")
+print("|{:>5s} |{:>5s} |".format("x", "y"))
+print("-" * 15)
+
+x_table = Xst
+n_table = round((Xen - Xst) / 0.5)
+for i in range(n_table + 1):
+    x_table = Xst + i * 0.5
+    y_val = y(x_table)
+    print("|{:1.2f} |{:2.2f} |".format(x_table, y_val))
+
+# 2. Подготовка данных для графика
+xs = []
+ys = []
+n_plot = round((Xst - Xen) / dx)
+for i in range(n_plot + 1):
+    x = Xst + i * dx
+    val = y(x)
+    if val is not None:
+        xs.append(x)
+        ys.append(val)
+
+# 3. Построение графика
+plt.figure(figsize=(10, 6))
+plt.plot(xs, ys, label='y(x)', linewidth=2)
+
+plt.title('График кусочно-заданной функции')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.grid(True, linestyle='--', alpha=0.5)
+plt.axhline(0, color='black', linewidth=1)
+plt.axvline(0, color='black', linewidth=1)
+plt.legend()
+plt.xlim(Xst, Xen)
+
+plt.show()
