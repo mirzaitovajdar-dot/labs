@@ -1,0 +1,90 @@
+import math
+import tkinter as tk
+from tkinter import simpledialog
+import matplotlib
+import matplotlib.pyplot as plt
+
+# ввод исходных данных через окно
+root = tk.Tk()
+root.withdraw()
+
+def ask(title, default):
+    while True:
+        s = simpledialog.askstring(title, title, initialvalue=default, parent=root)
+        try:
+            return float(s)
+        except (TypeError, ValueError):
+            pass
+
+Xn  = ask('Xнач', '-10')
+Xk  = ask('Xкон', '-1.1')
+dx  = ask('Шаг dx', '0.5')
+eps = ask('Точность eps', '0.0001')
+b   = ask('Параметр b', '1')
+root.destroy()
+
+if Xk <= Xn or dx <= 0:
+    raise SystemExit('Ошибка: нужно Xкон > Xнач и dx > 0')
+if Xn >= -1:
+    print('Внимание: ряд Тейлора сходится только при x < -1; график y(x) не построится')
+
+# функция через ряд Тейлора с точностью eps
+def y_taylor(x, eps):
+    """y(x) = -pi/2 + sum (-1)^(n+1) / ((2n+1) * x^(2n+1)), x < -1"""
+    total = 0.0
+    term = -1.0 / x                      # первый член ряда, n = 0
+    n = 0
+    while abs(term) >= eps:
+        total += term
+        n += 1
+        term *= -(2 * n - 1) / ((2 * n + 1) * x * x)  # следующий член рекуррентно
+    return -math.pi / 2 + total
+
+# точки графиков: много промежуточных точек для плавности
+n_sub = 20                            # доп. точек внутри каждого шага dx
+n_int = max(1, round((Xk - Xn) / dx))
+n_pts = n_int * n_sub + 1
+xs = [Xn + (Xk - Xn) * i / (n_pts - 1) for i in range(n_pts)]
+
+ys = [y_taylor(x, eps) if x < -1 else None for x in xs]   # ряд сходится при x < -1
+zs = [math.atan(x) + b for x in xs]
+
+# масштабирование по фактическим значениям
+vals = [v for v in ys + zs if v is not None]
+ymin, ymax = min(vals), max(vals)
+if ymax - ymin < 1e-9:                # защита от вырожденного диапазона
+    ymin -= 1
+    ymax += 1
+pad = 0.05 * (ymax - ymin)            # небольшой запас по краям
+ymin, ymax = ymin - pad, ymax + pad
+
+# окно на весь экран независимо от разрешения
+matplotlib.use('TkAgg')
+mgr = plt.get_current_fig_manager()
+try:                                  # Linux / Windows
+    mgr.resize(int(mgr.window.winfo_screenwidth() * 0.95),
+               int(mgr.window.winfo_screenheight() * 0.95))
+    mgr.window.state('zoomed')
+except Exception:
+    try:
+        mgr.full_screen_toggle()
+    except Exception:
+        pass
+
+fig, ax = plt.subplots()
+
+# заголовок и подписи осей
+ax.set_title('Графики функций y(x) и z(x) = arctg(x) + b', fontsize=14)
+ax.set_xlabel('X', fontsize=12)
+ax.set_ylabel('Y', fontsize=12)
+
+ax.set_xlim(Xn, Xk)
+ax.set_ylim(ymin, ymax)
+ax.grid(True, linestyle=':')
+
+# графики плавными линиями разных цветов
+ax.plot(xs, zs, color='blue',   linewidth=2, label='z(x) = arctg(x) + b')
+ax.plot(xs, ys, color='red',    linewidth=2, label='y(x) — ряд Тейлора, точность eps')
+ax.legend(loc='best', fontsize=11)
+
+plt.show()
