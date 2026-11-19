@@ -71,10 +71,10 @@ def plot_results(points, x_start, x_end, dx, eps):
     # Развернуть окно почти на весь экран
     mng = plt.get_current_fig_manager()
     try:
-        mng.window.state('zoomed')      # Windows / TkAgg
+        mng.window.state('zoomed')     
     except Exception:
         try:
-            mng.full_screen_toggle()    # запасной вариант
+            mng.full_screen_toggle()    
         except Exception:
             pass
 
