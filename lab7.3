@@ -1,0 +1,113 @@
+import math
+import matplotlib.pyplot as plt
+
+
+def taylor(x, eps, max_iter=1000):
+    """Сумма ряда 5x - 15x^2 + 35x^3 - ... = 1 - (1+x)^(-5)"""
+    term = 5.0 * x
+    total = term
+    k = 1
+    n = 1
+    while abs(term) >= eps:
+        if n >= max_iter:
+            return None
+        term *= -x * (k + 5) / (k + 1)
+        total += term
+        k += 1
+        n += 1
+    return total, n
+
+
+def f_exact(x):
+    """Точное значение функции для сравнения."""
+    return 1.0 - (1.0 + x) ** (-5)
+
+
+def plot_results(points, x_start, x_end, dx, eps):
+    """Рисует график на большую часть экрана."""
+    xs  = [p[0] for p in points if p[1] is not None]
+    ys  = [p[1] for p in points if p[1] is not None]
+    ns  = [p[2] for p in points if p[1] is not None]
+
+    if not xs:
+        print('Нет точек, где ряд сходится, — график не строим.')
+        return
+
+    fig, ax = plt.subplots(figsize=(12, 7))
+
+    # Ряд Тейлора
+    ax.plot(xs, ys, 'o-', color='tab:blue',
+            label=f'ряд Тейлора (eps = {eps:g})')
+
+    # Точное значение пунктиром — там, где функция определена
+    ex = [x for x in xs if x > -1.0]
+    ey = [f_exact(x) for x in ex]
+    if ex:
+        ax.plot(ex, ey, '--', color='tab:red',
+                label=r'точно: $1-(1+x)^{-5}$')
+
+    # Границы области сходимости
+    if min(xs) < -1 < max(xs) or min(xs) < 1 < max(xs):
+        ax.axvspan(-1, 1, color='green', alpha=0.08,
+                   label='область сходимости |x| < 1')
+
+    # Осевые линии
+    ax.axhline(0, color='black', linewidth=0.8)
+    ax.axvline(0, color='black', linewidth=0.8)
+
+    ax.set_title('Вычисление функции через ряд Тейлора\n'
+                 f'x ∈ [{x_start:g}; {x_end:g}], dx = {dx:g}, eps = {eps:g}')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+
+    ax.relim()
+    ax.autoscale_view()
+    ax.margins(x=0.05, y=0.1)
+    ax.grid(True, linestyle='--', alpha=0.6)
+    ax.legend(loc='best')
+
+    fig.tight_layout()          # ничего не обрезается
+
+    # Развернуть окно почти на весь экран
+    mng = plt.get_current_fig_manager()
+    try:
+        mng.window.state('zoomed')      # Windows / TkAgg
+    except Exception:
+        try:
+            mng.full_screen_toggle()    # запасной вариант
+        except Exception:
+            pass
+
+    plt.show()
+
+
+def main():
+    x_start = float(input('Xнач = ') or -0.9)
+    x_end   = float(input('Xкон = ') or 0.9)
+    dx      = float(input('шаг dx = ') or 0.1)
+    eps     = float(input('точность eps = ') or 1e-3)
+
+    steps = round((x_end - x_start) / dx)
+
+    print('   Вычисление функции с помощью ряда Тейлора')
+    print('------------------------------------------------------')
+    print(f'|{"x":^9}|{"значение ряда":^21}|{"число членов":^13}|')
+    print('------------------------------------------------------')
+
+    points = []   # (x, сумма ряда или None, число членов)
+    for i in range(steps + 1):
+        x = x_start + i * dx
+        res = taylor(x, eps)
+        if res is None:
+            print(f'|{x:^10.4f}|{"ряд расходится":^22}|{i:^14}|')
+            points.append((x, None, i))
+        else:
+            s, n = res
+            print(f'|{x:^10.4f}|{s:^22.10f}|{n:^14d}|')
+            points.append((x, s, n))
+    print('------------------------------------------------------')
+
+    plot_results(points, x_start, x_end, dx, eps)
+
+
+main()
