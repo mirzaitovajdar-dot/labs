@@ -33,7 +33,7 @@ for i in range(n_table + 1):
 # 2. Подготовка данных для графика
 xs = []
 ys = []
-n_plot = round((Xst - Xen) / dx)
+n_plot = round((Xen - Xst) / dx)
 for i in range(n_plot + 1):
     x = Xst + i * dx
     val = y(x)
