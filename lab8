@@ -61,7 +61,7 @@ ymin, ymax = ymin - pad, ymax + pad
 # окно на весь экран независимо от разрешения
 matplotlib.use('TkAgg')
 mgr = plt.get_current_fig_manager()
-try:                                  # Linux / Windows
+try:                                
     mgr.resize(int(mgr.window.winfo_screenwidth() * 0.95),
                int(mgr.window.winfo_screenheight() * 0.95))
     mgr.window.state('zoomed')
