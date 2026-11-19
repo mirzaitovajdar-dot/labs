@@ -1,0 +1,103 @@
+import random
+import math
+import matplotlib.pyplot as plt
+
+def is_hit(x, y, R):
+    # Область 1: внутри квадрата, но вне круга
+    in_square = -R <= x <= R and -R <= y <= R
+    outside_circle = x**2 + y**2 > R**2
+
+    # Область 2: внутри круга, но в двух сегментах
+    inside_circle = x**2 + y**2 <= R**2
+    segment_1 = y > x + R          # выше хорды от (-R, 0) до (0, R)
+    segment_2 = y < -x - R         # ниже хорды от (R, 0) до (0, -R)
+
+    return (in_square and outside_circle) or (inside_circle and (segment_1 or segment_2))
+
+# Параметры
+R = 1.0
+num_shots = 10000  #до 10000 испытаний
+
+# --- Метод Монте-Карло ---
+hits = 0
+points_hit = []
+points_miss = []
+
+for _ in range(num_shots):
+    x = random.uniform(-R, R)
+    y = random.uniform(-R, R)
+    if is_hit(x, y, R):
+        hits += 1
+        points_hit.append((x, y))
+    else:
+        points_miss.append((x, y))
+
+area_mc = (hits / num_shots) * (4 * R**2)  # площадь квадрата = 4*R^2
+
+# Реальная площадь
+# Площадь вне круга внутри квадрата: S1 = (2R)^2 - πR^2 = 4R^2 - πR^2
+S1 = 4 * R**2 - math.pi * R**2
+
+# Площадь двух сегментов внутри круга.
+S2 = (math.pi * R**2 / 2) - R**2
+
+area_real = S1 + S2
+
+# Оценка точности в процентах
+accuracy_percent = (1 - abs(area_mc - area_real) / area_real) * 100
+
+print(f"Число испытаний: {num_shots}")
+print(f"Попаданий: {hits}")
+print(f"Площадь по Монте-Карло: {area_mc:.6f}")
+print(f"Реальная площадь: {area_real:.6f}")
+print(f"Точность: {accuracy_percent:.2f}%")
+
+# --- График (фигура и точечное изображение) ---
+fig, ax = plt.subplots(figsize=(8, 8))
+
+# Квадрат
+square = plt.Rectangle((-R, -R), 2*R, 2*R, fill=False, edgecolor='black', linewidth=1.5)
+ax.add_patch(square)
+
+# Круг
+circle = plt.Circle((0, 0), R, fill=False, edgecolor='blue', linewidth=1.5)
+ax.add_patch(circle)
+
+# 1) Вне круга: просто покажем точки, а область не закрашиваем явно, чтобы не усложнять
+# 2) Два сегмента внутри круга - нарисуем их как полигоны
+def segment_polygon(R):
+    xs, ys = [], []
+    # Дуга от (-R, 0) до (0, R) против часовой стрелки
+    for a in range(90, 181):  # 90..180 градусов
+        rad = math.radians(a)
+        xs.append(R * math.cos(rad))
+        ys.append(R * math.sin(rad))
+    xs.append(-R); ys.append(0)  # замыкаем на (-R, 0)
+    return xs, ys
+
+seg1_xs, seg1_ys = segment_polygon(R)
+seg1 = plt.Polygon(list(zip(seg1_xs, seg1_ys)), color='red', alpha=0.3)
+ax.add_patch(seg1)
+
+# Второй сегмент: симметрично
+seg2_xs = [-x for x in seg1_xs]
+seg2_ys = [-y for y in seg1_ys]
+seg2 = plt.Polygon(list(zip(seg2_xs, seg2_ys)), color='red', alpha=0.3)
+ax.add_patch(seg2)
+
+# Точки Монте-Карло
+if points_hit:
+    hx, hy = zip(*points_hit)
+    ax.scatter(hx, hy, s=1, color='green', label='Попадания', alpha=0.6)
+if points_miss:
+    mx, my = zip(*points_miss)
+    ax.scatter(mx, my, s=0.8, color='gray', label='Промахи', alpha=0.4)
+
+ax.set_aspect('equal')
+ax.set_xlim(-R*1.2, R*1.2)
+ax.set_ylim(-R*1.2, R*1.2)
+ax.grid(True, linestyle='--', alpha=0.3)
+ax.legend(loc='upper right')
+ax.set_title(f'Монте-Карло: R={R}, N={num_shots}\nS_MC={area_mc:.4f}, S_real={area_real:.4f}, точность={accuracy_percent:.2f}%')
+
+plt.show()
