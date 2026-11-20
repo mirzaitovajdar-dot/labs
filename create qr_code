@@ -1,0 +1,4 @@
+import qrcode
+
+img = qrcode.make("Я Добрий")
+img.save("qr_code.png")
